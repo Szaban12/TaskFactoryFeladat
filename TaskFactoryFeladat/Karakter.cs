@@ -63,6 +63,9 @@ namespace TaskFactoryFeladat
             while (true)
             {
                 System.Threading.Thread.Sleep(500);
+                Random r = new Random();
+                DX = r.Next(-1, 2);
+                DY = r.Next(-1, 2);
                 PX = AX;
                 PY = AY;
                 AX = PX + DX;

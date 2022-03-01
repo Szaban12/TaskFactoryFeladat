@@ -22,6 +22,7 @@ namespace TaskFactoryFeladat
             }
             System.Threading.Thread.Sleep(15000);
             Console.ReadKey();
+            //Félkész
         }
     }
 }
