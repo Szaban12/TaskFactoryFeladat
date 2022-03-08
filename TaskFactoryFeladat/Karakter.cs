@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TaskFactoryFeladat
@@ -16,14 +17,23 @@ namespace TaskFactoryFeladat
         public int DY { get; set; }
         public System.ConsoleColor MyColor { get; set; }
         public char MyChar { get; set; }
-        public Karakter()
+        public static class StaticRandom
+        {
+            static int seed = Environment.TickCount;
+            static readonly ThreadLocal<Random> random = new ThreadLocal<Random>(() => new Random(Interlocked.Increment(ref seed)));
+            public static int Rand()   //Threading miatt a sima random number gen néha nem randomizal, ezzel igen mivel szálbiztos
+            {
+                return random.Value.Next(3);
+            }
+        }
+        public Karakter(int y, int dx, int vele)
         {
             Random r = new Random();
-            PX = r.Next(2,50);
-            PY = r.Next(2,25);
-            DX = r.Next(-1,2);
-            DY = r.Next(-1,2);
-            int vel = r.Next(2);
+            AX = 25;
+            AY = y;
+            DX = dx;
+            DY = 0;
+            int vel = StaticRandom.Rand();
             if (vel==0)
             {
                 MyChar = '@';
@@ -32,7 +42,7 @@ namespace TaskFactoryFeladat
             {
                 MyChar = '&';
             }
-            vel = r.Next(0, 3);
+            vel = vele;
             if (vel==0)
             {
                 MyColor = ConsoleColor.Red;
@@ -52,33 +62,24 @@ namespace TaskFactoryFeladat
             Console.ForegroundColor = System.ConsoleColor.Black;
             Console.SetCursorPosition(PX, PY);
             Console.Write(' ');
+            PX = AX;PY = AY;
             Console.ForegroundColor = MyColor;
             
             Console.SetCursorPosition(AX, AY);
             Console.Write(MyChar);
         }
-        public void Move()
+        public void Move(CancellationToken token)
         {
 
             while (true)
             {
-                System.Threading.Thread.Sleep(500);
+                if (token.IsCancellationRequested)
+                {
+                    break;
+                }
+                System.Threading.Thread.Sleep(300);
                 Random r = new Random();
-                DX = r.Next(-1, 2);
-                DY = r.Next(-1, 2);
-                PX = AX;
-                PY = AY;
-                AX = PX + DX;
-                AY = PY + DY;
-                if (AX < 0)
-                {
-                    AX = 0;
-                }
-                if (AY < 0)
-                {
-                    AY = 0;
-                }
-                Draw();
+                AX = AX + DX; AY = AY + DY;
             }
             //System.Threading.Thread.Sleep(100);
             //PX = AX;
